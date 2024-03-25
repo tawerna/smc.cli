@@ -1,8 +1,40 @@
 import Foundation
 
+extension DateFormatter {
+    static let iso8601Full: DateFormatter = {
+        let formatter = DateFormatter()
+
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
+        formatter.calendar = Calendar(identifier: .iso8601)
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+
+        return formatter
+    } ()
+}
+
 struct Record: Decodable {
     var id: Int
     var content: String
+    var date: Date
+    
+    func print(withNumber: Bool = true, withDate: Bool = true) -> Void {
+        Swift.print()
+        
+        if withNumber {
+            Swift.print("#", id)
+        }
+
+        if withDate {
+            if #available(macOS 12.0, *) {
+                Swift.print(date.formatted(date: .long, time: .shortened), terminator: "\n\n")
+            } else {
+                Swift.print(date, terminator: "\n\n")
+            }
+        }
+        
+        Swift.print(content, terminator: "\n\n")
+    }
 }
 
 struct Links: Decodable {
@@ -26,6 +58,20 @@ struct Page: Decodable {
     var data: [Record]
     var links: Links
     var meta: Meta
+    
+    func print(withNumber: Bool = true, withDate: Bool = true) -> Void {
+        Swift.print()
+        for record in data {
+            record.print(withNumber: withNumber, withDate: withDate)
+            
+            for _ in 1...9 { Swift.print("-", terminator: "") }
+            
+            Swift.print()
+        }
+
+        Swift.print()
+        Swift.print("PAGE:", " ", String(meta.currentPage), "/", String(meta.lastPage), separator: "", terminator: "\n\n")
+    }
 }
 
 struct Search: Encodable {
@@ -44,6 +90,7 @@ class API {
         
         decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
         
         encoder = JSONEncoder()
         encoder.keyEncodingStrategy = .convertToSnakeCase

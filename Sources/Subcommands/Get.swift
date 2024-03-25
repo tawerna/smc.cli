@@ -11,8 +11,7 @@ extension SMC {
 
         func run() async throws -> Void {
             if let record = try await api.get(number) {
-                print()
-                print(record.content, terminator: "\n\n")
+                record.print(withNumber: false)
             } else {
                 print("no record by that number/ID", terminator: "\n\n")
             }
