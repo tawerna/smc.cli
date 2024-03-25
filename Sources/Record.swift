@@ -80,7 +80,7 @@ class API {
         
         let dateFormatter = DateFormatter()
 
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"
         dateFormatter.calendar = Calendar(identifier: .iso8601)
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
 
