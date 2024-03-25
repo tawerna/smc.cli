@@ -68,7 +68,7 @@ class API {
     }
 
     func page(_ number: UInt = 1) async throws -> Page {
-        let page: String = number < 1 ? String("1") : String(number)
+        let page: String = number < 1 ? "1" : String(number)
         
         var request: URLRequest = self.request;
         request.url!.append(queryItems: [
@@ -81,7 +81,7 @@ class API {
     }
     
     func search(_ query: String, _ number: UInt = 1) async throws -> Page {
-        let page: String = number < 1 ? String("1") : String(number)
+        let page: String = number < 1 ? "1" : String(number)
         
         var request: URLRequest = self.request;
         
