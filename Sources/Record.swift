@@ -1,7 +1,7 @@
 import Foundation
 
 struct Record: Decodable {
-    var id: Int
+    var id: UInt
     var content: String
     var date: Date
     
@@ -24,31 +24,19 @@ struct Record: Decodable {
     }
 }
 
-struct Links: Decodable {
-    var first: String?
-    var last: String?
-    var prev: String?
-    var next: String?
-}
-
-struct Meta: Decodable {
-    var currentPage: UInt
-    var from: UInt?
-    var lastPage: UInt
-    var path: String
-    var perPage: UInt
-    var to: UInt?
+struct Metadata: Decodable {
+    var page: UInt
+    var per: UInt
     var total: UInt
 }
 
 struct Page: Decodable {
-    var data: [Record]
-    var links: Links
-    var meta: Meta
+    var items: [Record]
+    var metadata: Metadata
     
     func print(withNumber: Bool = true, withDate: Bool = true) -> Void {
         Swift.print()
-        for record in data {
+        for record in items {
             record.print(withNumber: withNumber, withDate: withDate)
             
             for _ in 1...9 { Swift.print("-", terminator: "") }
@@ -57,7 +45,16 @@ struct Page: Decodable {
         }
 
         Swift.print()
-        Swift.print("PAGE:", " ", String(meta.currentPage), "/", String(meta.lastPage), separator: "", terminator: "\n\n")
+
+        Swift.print(
+            "PAGE:",
+            " ",
+            String(metadata.page),
+            "/",
+            String(format: "%.f", (Float(metadata.total) / Float(metadata.per)).rounded(.up)),
+            separator: "",
+            terminator: "\n\n"
+        )
     }
 }
 
@@ -77,14 +74,7 @@ class API {
         
         decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        
-        let dateFormatter = DateFormatter()
-
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"
-        dateFormatter.calendar = Calendar(identifier: .iso8601)
-        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-
-        decoder.dateDecodingStrategy = .formatted(dateFormatter)
+        decoder.dateDecodingStrategy = .iso8601
         
         encoder = JSONEncoder()
         encoder.keyEncodingStrategy = .convertToSnakeCase
@@ -132,7 +122,6 @@ class API {
 
         request.setValue(String(request.httpBody!.count), forHTTPHeaderField: "Content-Length")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//        request.addValue("charset=utf-8", forHTTPHeaderField: "Content-Type")
         
         request.url!.append(queryItems: [
             URLQueryItem(name: "page", value: page)
