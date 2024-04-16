@@ -1,7 +1,6 @@
 import ArgumentParser
 import Foundation
 
-@available(macOS 13, *)
 extension SMC {
     struct Page: AsyncParsableCommand {
         static var configuration = CommandConfiguration( abstract: "get all records (paginated)")

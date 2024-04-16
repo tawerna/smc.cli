@@ -1,7 +1,6 @@
 import ArgumentParser
 import Foundation
 
-@available(macOS 13, *)
 extension SMC {
     struct Search: AsyncParsableCommand {
         static var configuration = CommandConfiguration( abstract: "search for records (paginated)")
