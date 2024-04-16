@@ -13,11 +13,7 @@ struct Record: Decodable {
         }
 
         if withDate {
-            if #available(macOS 12.0, *) {
-                Swift.print(date.formatted(date: .long, time: .shortened), terminator: "\n\n")
-            } else {
-                Swift.print(date, terminator: "\n\n")
-            }
+            Swift.print(date.formatted(date: .long, time: .shortened), terminator: "\n\n")
         }
         
         Swift.print(content, terminator: "\n\n")
@@ -62,7 +58,6 @@ struct Search: Encodable {
     var query: String
 }
 
-@available(macOS 13.0, *)
 class API {
     private var request: URLRequest
     private let decoder: JSONDecoder
