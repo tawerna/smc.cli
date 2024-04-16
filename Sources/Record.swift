@@ -24,6 +24,13 @@ struct Metadata: Decodable {
     var page: UInt
     var per: UInt
     var total: UInt
+    var last: UInt {
+        guard per > 0 && total > 0 else {
+            return 1
+        }
+        
+        return UInt((Float(total) / Float(per)).rounded(.up))
+    }
 }
 
 struct Page: Decodable {
@@ -47,7 +54,7 @@ struct Page: Decodable {
             " ",
             String(metadata.page),
             "/",
-            String(format: "%.f", (Float(metadata.total) / Float(metadata.per)).rounded(.up)),
+            String(metadata.last),
             separator: "",
             terminator: "\n\n"
         )
