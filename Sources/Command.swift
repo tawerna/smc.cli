@@ -10,4 +10,19 @@ struct SMC: AsyncParsableCommand {
         subcommands: [Random.self, Get.self, Page.self, Search.self],
         defaultSubcommand: Random.self
     )
+    
+    static func getConfirmation(prompt: String, default: Bool) -> Bool {
+        print(prompt, terminator: " ")
+
+        let line = readLine()!
+
+        if line.caseInsensitiveCompare("n") == .orderedSame || line.caseInsensitiveCompare("no") == .orderedSame {
+            return false
+        }
+        if line.caseInsensitiveCompare("y") == .orderedSame || line.caseInsensitiveCompare("yes") == .orderedSame {
+            return true
+        }
+
+        return `default`
+    }
 }

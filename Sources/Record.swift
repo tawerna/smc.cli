@@ -1,4 +1,5 @@
 import Foundation
+import HTTPTypes
 
 struct Record: Decodable {
     var id: UInt
@@ -52,9 +53,9 @@ struct Page: Decodable {
         Swift.print(
             "PAGE:",
             " ",
-            String(metadata.page),
+            metadata.page,
             "/",
-            String(metadata.last),
+            metadata.last,
             separator: "",
             terminator: "\n\n"
         )
@@ -66,13 +67,12 @@ struct Search: Encodable {
 }
 
 class API {
-    private var request: URLRequest
+    private let endpoint: String
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
-    
-    init (endpoint: String = "https://api.tawerna.net/smc/") {
-        request = URLRequest(url: URL(string: endpoint)!)
-        request.addValue("application/json", forHTTPHeaderField: "Accept")
+
+    init (endpoint: String = "https://api.tawerna.net/") {
+        self.endpoint = endpoint.hasSuffix("/") ? endpoint : endpoint + "/"
         
         decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -83,29 +83,21 @@ class API {
     }
 
     func get(_ number: UInt) async throws -> Record? {
-        var request: URLRequest = self.request;
-        request.url!.append(path: String(number))
-
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let (data, _) = try await URLSession.shared.data(from: URL(string: endpoint + "smc/" + String(number))!)
 
         return try? decoder.decode(Record.self, from: data)
     }
 
     func random() async throws -> Record {
-        var request: URLRequest = self.request;
-        request.url!.append(path: "random")
-
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let (data, _) = try await URLSession.shared.data(from: URL(string: endpoint + "smc/random")!)
 
         return try! decoder.decode(Record.self, from: data)
     }
 
     func page(_ number: UInt = 1) async throws -> Page {
-        let page: String = number < 1 ? "1" : String(number)
-        
-        var request: URLRequest = self.request;
+        var request: URLRequest = URLRequest(url: URL(string: endpoint + "smc/")!)
         request.url!.append(queryItems: [
-            URLQueryItem(name: "page", value: page)
+            URLQueryItem(name: "page", value: number < 1 ? "1" : String(number))
         ])
 
         let (data, _) = try await URLSession.shared.data(for: request)
@@ -114,23 +106,20 @@ class API {
     }
     
     func search(_ query: String, _ number: UInt = 1) async throws -> Page {
-        let page: String = number < 1 ? "1" : String(number)
-        
-        var request: URLRequest = self.request;
-        
-        request.url!.append(path: "search")
+        var request: URLRequest = URLRequest(url: URL(string: endpoint + "smc/search")!)
+
         request.httpMethod = "POST";
         request.httpBody = try! encoder.encode(Search(query: query))
 
-        request.setValue(String(request.httpBody!.count), forHTTPHeaderField: "Content-Length")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(String(request.httpBody!.count), forHTTPHeaderField: HTTPField.Name.contentLength.rawName)
+        request.setValue("application/json", forHTTPHeaderField: HTTPField.Name.contentType.rawName)
         
         request.url!.append(queryItems: [
-            URLQueryItem(name: "page", value: page)
+            URLQueryItem(name: "page", value: number < 1 ? "1" : String(number))
         ])
 
         let (data, _) = try await URLSession.shared.data(for: request)
-        
+
         return try! decoder.decode(Page.self, from: data)
     }
 }

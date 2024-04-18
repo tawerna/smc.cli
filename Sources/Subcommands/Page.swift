@@ -8,8 +8,30 @@ extension SMC {
         @Argument(help: "page number")
         var number: UInt = 1
         
-        func run() async throws -> Void {
-            try await api.page(number).print()
+        mutating func run() async throws -> Void {
+            let page = try await api.page(number)
+            
+            page.print()
+            
+            guard number < page.metadata.last else {
+                return
+            }
+
+            if SMC.getConfirmation(prompt: "Next Page? (y/N)", default: false) {
+                number += 1
+                try await run()
+            }
+        }
+        
+        private func isConfirmation(_ line: String) -> Bool {
+            if line.caseInsensitiveCompare("y") == .orderedSame {
+                return true
+            }
+            if line.caseInsensitiveCompare("yes") == .orderedSame {
+                return true
+            }
+
+            return false
         }
     }
 }

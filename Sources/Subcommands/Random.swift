@@ -7,6 +7,10 @@ extension SMC {
 
         func run() async throws -> Void {            
             try await api.random().print()
+            
+            if SMC.getConfirmation(prompt: "Another one? (Y/n)", default: true) {
+                try await run()
+            }
         }
     }
 }
