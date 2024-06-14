@@ -1,5 +1,4 @@
 import Foundation
-import HTTPTypes
 
 extension Components.Schemas.SMC {    
     func print(withNumber: Bool = true, withDate: Bool = true) -> Void {
