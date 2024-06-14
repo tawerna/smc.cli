@@ -9,10 +9,19 @@ extension SMC {
         var number: UInt
 
         func run() async throws -> Void {
-            if let record = try await api.get(number) {
-                record.print(withNumber: false)
-            } else {
-                print("no record by that number/ID", terminator: "\n\n")
+            let response = try await client.getSingleSMC(
+                Operations.getSingleSMC.Input(
+                    path: Operations.getSingleSMC.Input.Path(id: Int(number))
+                )
+            )
+            
+            switch response {
+            case .ok(_):
+                try response.ok.body.json.print(withNumber: false)
+            case .notFound(_):
+                print(try response.notFound.body.json.message!, terminator: "\n\n")
+            default:
+                print("unexpected response", terminator: "\n\n")
             }
         }
     }

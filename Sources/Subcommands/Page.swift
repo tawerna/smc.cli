@@ -9,11 +9,19 @@ extension SMC {
         var number: UInt = 1
         
         mutating func run() async throws -> Void {
-            let page = try await api.page(number)
+            let response = try await client.listSMC(
+                Operations.listSMC.Input(
+                    query: Operations.listSMC.Input.Query(
+                        page: Int(number)
+                    )
+                )
+            )
             
+            let page = try response.ok.body.json;
+
             page.print()
             
-            guard number < page.metadata.last else {
+            guard number < page.metadata!.last else {
                 return
             }
 

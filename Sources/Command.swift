@@ -1,7 +1,11 @@
 import ArgumentParser
 import Foundation
+import OpenAPIURLSession
 
-let api = API()
+let client = Client(
+    serverURL: try! Servers.server1(),
+    transport: URLSessionTransport()
+)
 
 @main
 struct SMC: AsyncParsableCommand {

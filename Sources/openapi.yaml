@@ -1,0 +1,146 @@
+openapi: '3.1.0'
+info:
+  title: 'Tawerna Api'
+  version: 1.0.0
+servers:
+- url: https://api.tawerna.net
+  description: public
+- url: http://localhost:8080
+  description: dev
+paths:
+  /smc:
+    get:
+      summary: wszystkie śmiechały
+      description: zwraca wszystkie wpisy podzielone na strony
+      tags: [SMC]
+      operationId: listSMC
+      parameters:
+      - in: query
+        description: nr strony
+        name: page
+        schema:
+          type: integer
+      - in: query
+        description: ilość wpisów na stronę
+        name: per
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+  /smc/search:
+    post:
+      summary: wyszukiwanie śmiechał
+      description: zwraca wszystkie wpisy pasujące do wyszukiwanej frazy
+      tags: [SMC]
+      operationId: searchSMC
+      parameters:
+      - in: query
+        description: nr strony
+        name: page
+        schema:
+          type: integer
+      - in: query
+        description: ilość wpisów na stronę
+        name: per
+        schema:
+          type: integer
+      requestBody:
+        description: kryteria wyszukiwania w formacie JSON
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+  /smc/random:
+    get:
+      tags: [SMC]
+      operationId: getRandomSMC
+      summary: losowa śmiechała
+      description: zwraca za każdym wywołaniem losową śmiechałę
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SMC'
+  /smc/{id}:
+    get:
+      tags: [SMC]
+      operationId: getSingleSMC
+      summary: wybrana śmiechała
+      description: zwraca śmiechałę o wskazanym ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: numeryczny identyfikator śmiechały
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SMC'
+        "404":
+          description: brak śmiechały o podanym ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+tags:
+- name: SMC
+  description: "Śmiechały"
+components:
+  schemas:
+    Page:
+      type: object
+      properties:
+        metadata:
+          type: object
+          properties:
+            page:
+              type: integer
+            total:
+              type: integer
+            per:
+              type: integer
+        items:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/SMC'
+    SMC:
+      type: object
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+          format: date-time
+        content:
+          type: string
+      required: [id, date, content]
+    NotFound:
+      type: object
+      properties:
+        message:
+          type: string

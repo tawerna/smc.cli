@@ -12,10 +12,22 @@ extension SMC {
         var number: UInt = 1
         
         mutating func run() async throws -> Void {
-            let page = try await api.search(query, number)
+            let response = try await client.searchSMC(
+                Operations.searchSMC.Input(
+                    query: Operations.searchSMC.Input.Query(
+                        page: Int(number)
+                    ),
+                    body: Operations.searchSMC.Input.Body.json(
+                        Operations.searchSMC.Input.Body.jsonPayload(query: query)
+                    )
+                )
+            )
+            
+            let page = try response.ok.body.json;
+
             page.print()
             
-            guard number < page.metadata.last else {
+            guard number < page.metadata!.last else {
                 return
             }
 
